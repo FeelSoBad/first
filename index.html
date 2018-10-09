@@ -2,115 +2,86 @@
 <html>
 
 	<head>
-		<meta charset="UTF-8">
-		<title></title>
+		<meta charset="utf-8" />
+		<title>获取时间差数组（秒）</title>
+		<script type="text/javascript" src="js/echarts.common.min.js"></script>
 	</head>
 
 	<body>
-		<!--<script type="text/javascript" src="layui/lay/mamodules/jquery.js"></script>-->
 		<script>
-			var json = {
-				id: '1',
-				name: '111'
-			}
-			var arr = [{
-				id: '1',
-				name: '22'
-			}, {
-				id: '22',
-				name: '22'
-			}]
-			console.log(json)
-			console.log(arr)
-			console.log(arr instanceof Array); //true
-			console.log(json instanceof Array); //false
-			console.log('=========分割线=======')
-			json = JSON.stringify(json)
-			arr = JSON.stringify(arr)
-			console.log(arr instanceof Array); //true
-			console.log(json instanceof Array); //false
-			console.log(json)
-			console.log(arr)
-			console.log('=========分割线=======')
-			var json2 = JSON.parse(json)
-			var arr2 = JSON.parse(arr)
-			console.log(arr2 instanceof Array); //true
-			console.log(json2 instanceof Array); //false
-			console.log(json2)
-			console.log(arr2)
-		</script>
-		<script>
-			var arrs = [];
-			haha()
-			function haha() {
-				var data = [{
-					name: '中国',
-					children: [{
-							name: '教第三节课',
-
-						},
-						{
-							name: '教呼呼',
-							children: [{
-								name: '大一',
-								children: [{
-										name: '课程1',
-										children: [{
-												name: '1231'
-											},
-											{
-												name: '121'
-											}
-										]
-									},
-									{
-										name: '课程2',
-										children: [{
-												name: '1232'
-											},
-											{
-												name: '122'
-											}
-										]
-									},
-									{
-										name: '课程3',
-										children: [{
-												name: '1233'
-											},
-											{
-												name: '123'
-											}
-										]
-									},
-
-								]
-							}]
-						},
-						{
-							name: '活动',
-							children: null
-						}
-					]
-				}];
-				getArray(data, '活动');
-				console.log(data);
-				for(var i in undefined) {
-					alert(123);
-				}
+			var startTime = '2018-09-09 01:00:00';
+			var entTime = '2018-09-09 02:00:00';
+			var timeDifference = mathDateSet(startTime,entTime) //时间差（秒）
+			console.log(timeDifference)
+			var xArr = getDateArray(entTime,timeDifference); //时间数组 （秒）
+			console.log(xArr)
+			
+			
+			
+			//计算时间段内相差的天，分钟，秒
+			function mathDateSet(startTime, endTime) {
+				var date1 = startTime; //开始时间
+				var date2 = endTime; //结束时间
+				var date3 = new Date(date2).getTime() - new Date(date1).getTime(); //时间差的毫秒数     
+				//------------------------------
+				var seconds = date3/1000
+				return seconds;
 			}
 
-			function getArray(data, name) {
-				for(var i in data) {
-					console.log('i', i);
-					console.log('datai', data[i].children);
-					if(data[i].name == name) {
-						console.log(data[i]);
-						break;
-					} else {
-						getArray(data[i].children, name);
-					}
+			function lowNewDate(date) {
+				//				let time1 = '2017-10-09 17:22:37';
+				var time1 = date;
+				var dateM = new Date(time1.replace(/-/g, '/')); //开始时间
+				var time2 = dateM.getTime();
+				//time2 -> 时间戳
+				//timeDate -> 无格式化时间
+				var timeDate = new Date(time2)
+				return timeDate;
+			}
+			//时间转格式化时间 yyyy:mm:dd 00:00:00
+			function formatDateTime(date) {
+				var y = date.getFullYear();
+				var m = date.getMonth() + 1;
+				m = m < 10 ? ('0' + m) : m;
+				var d = date.getDate();
+				d = d < 10 ? ('0' + d) : d;
+				var h = date.getHours();
+				h = h < 10 ? ('0' + h) : h;
+				var minute = date.getMinutes();
+				minute = minute < 10 ? ('0' + minute) : minute;
+				var second = date.getSeconds();
+				second = second < 10 ? ('0' + second) : second;
+				return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
+			};
+			//获取时间段内所有秒的数组
+			/*
+			endDate /结束日期
+			splitTime /时间间隔
+			count	/数组个数
+			*/
+			function getDateArray(endDate, count, splitTime) {
+				if(!endDate) {
+					endDate = new Date();
 				}
+				if(!splitTime) {
+					splitTime = 1000;
+				}
+				if(!count) {
+					count = 60;
+				}
+				var endTime = new Date(endDate).getTime();
+				var mod = endTime % splitTime;
+				if(mod > 0) {
+					endTime -= mod;
+				}
+				var dateArray = [];
+				while(count-- > 0) {
+					var d = new Date();
+					d.setTime(endTime - count * splitTime);
+					var newD = formatDateTime(d) //转化为格式化时间
+					dateArray.push(newD);
+				}
+				return dateArray;
 			}
 		</script>
 	</body>
