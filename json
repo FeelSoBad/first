@@ -1,16 +1,66 @@
-[
-  {"id":1,"initial":"ad","keyword":"奥迪"},
-  {"id":2,"initial":"ada4l","keyword":"奥迪A4L"},
-  {"id":3,"initial":"ada6l","keyword":"奥迪A6L"},
-  {"id":4,"initial":"adq5","keyword":"奥迪Q5"},
-  {"id":5,"initial":"ada3","keyword":"奥迪A3"},
-  {"id":6,"initial":"adq7","keyword":"奥迪Q7(进口)"},
-  {"id":7,"initial":"ada8","keyword":"奥迪A8L(进口)"},
-  {"id":8,"initial":"bm","keyword":"宝马"},
-  {"id":9,"initial":"bm5x","keyword":"宝马5系"},
-  {"id":10,"initial":"bm7x","keyword":"宝马7系"},
-  {"id":11,"initial":"bt","keyword":"本田"},
-  {"id":12,"initial":"bqsbx25","keyword":"北汽绅宝 X25"},
-  {"id":13,"initial":"bqsbx35","keyword":"北汽绅宝X35"},
-  {"id":14,"initial":"bqsbx55","keyword":"北汽绅宝X55"}
-]
+jsTree 是基于jquery的树插件，支持拖放、复制、删除、快捷键、多选、自定义节点图标、自定义右键菜单、跨页面保存状态等等，总之我想到的它基本上都有了，而且最值得表扬的是它让人感觉一点都不慢哦。 
+
+jsTree有节点选择事件，即 
+复制代码 代码如下:
+
+.bind("select_node.jstree", function(e, data) { 
+//alert(data.rslt.obj.attr("id") + ":" + data.rslt.obj.attr("rel")); 
+}) 
+
+
+其实我认为它更像是节点的单击事件，因为每次点节点的时候它都会触发，不管之前该节点是否已经被选中。 
+
+近日做个文件管理的东东，需要用到节点的双击事件，如双击某个节点打开该节点的编辑页面。 
+20100727085202550.png
+jstree虽然有双击事件，但是并非针对节点的，而是你双击树所在区域就会触发，如上图任何一个地方。 
+
+离节点双击事件最接近的应该就是节点选择事件，因此又是“照葫芦画瓢”啦。 
+
+分析 
+在第833行 this.get_container() 后是节点的单击事件 
+复制代码 代码如下:
+
+.delegate("a", "click.jstree", $.proxy(function (event) { 
+event.preventDefault(); 
+this.select_node(event.currentTarget, true, event); 
+}, this)) 
+
+
+同样我再这里插入节点双击事件 
+复制代码 代码如下:
+
+.delegate("a", "dblclick.jstree", $.proxy(function(event) { 
+event.preventDefault(); 
+this.dblclick_node(event.currentTarget, true, event); 
+}, this)) 
+
+
+接着，我再实现 dblclick_node 方法就可以了。 
+
+在第928行找到 select_node 的代码，比较复杂。但里面90%对于双击来说是没有用处的，如处理单选、多选、保存选择结果到cookies等。因此 dblclick_node 方法的实现要比 select_node 简单很多。 
+复制代码 代码如下:
+
+dblclick_node: function(obj, check, e) { 
+obj = this._get_node(obj); 
+if (obj == -1 || !obj || !obj.length) { return false; } 
+this.__callback({ "obj": obj }); 
+}, 
+
+
+OK，就这样了。 
+
+使用例子 
+跟 select_node 用法一样 
+复制代码 代码如下:
+
+.bind("dblclick_node.jstree", function(e, data) { 
+//alert(data.rslt.obj.attr("id") + ":" + data.rslt.obj.attr("rel")); 
+}) 
+
+
+改造后的代码下载  /201007/yuanma/jquery.jstree.rar
+顺便说说 
+jstree 跟另一个插件jquery validate 是水火不容的，当两者共存时，jstree虽然也可以构造树出来，但如僵尸一般不能展开。这里mark一个，日后试试能否修改。 
+
+作者：Bruce（编程的艺术世界）
+以上是云栖社区小编为您精心准备的的内容，在云栖社区的博客、问答、公众号、人物、课程等栏目也有的相关内容，欢迎继续使用右上角搜索按钮进行搜索jstree ， 节点 双击事件 jstree 节点双击事件、jstree 增加节点、jquery 增加节点、jquery 增加兄弟节点、jquery增加子节点，以便于您获取更多的相关知识。
